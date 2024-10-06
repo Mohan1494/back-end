@@ -18,19 +18,20 @@ def analyze():
         return jsonify({'error': 'No input provided'}), 400
 
     # Preprocess the input using the vectorizer
-    transformed_input = vectorizer.transform([text])
+    try:
+        transformed_input = vectorizer.transform([text])
+    except Exception as e:
+        return jsonify({'error': f'Error in preprocessing input: {str(e)}'}), 500
 
     # Predict sentiment using the model
-    prediction = model.predict(transformed_input)
+    try:
+        prediction = model.predict(transformed_input)
+    except Exception as e:
+        return jsonify({'error': f'Error in predicting sentiment: {str(e)}'}), 500
 
     # Assuming the model returns classes like 0 (negative), 1 (neutral), 2 (positive)
-    sentiment = ''
-    if prediction[0] == 0:
-        sentiment = 'negative'
-    elif prediction[0] == 1:
-        sentiment = 'neutral'
-    elif prediction[0] == 2:
-        sentiment = 'positive'
+    sentiment_classes = {0: 'negative', 1: 'neutral', 2: 'positive'}
+    sentiment = sentiment_classes.get(prediction[0], 'unknown')
 
     # Return prediction
     return jsonify({'sentiment': sentiment})
