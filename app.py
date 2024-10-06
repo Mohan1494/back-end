@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Import CORS
 import joblib
 import os
+import re
 
 # Load the vectorizer and the model
 vectorizer = joblib.load('vectorizer.pkl')
@@ -9,8 +9,11 @@ model = joblib.load('model.pkl')
 
 app = Flask(__name__)
 
-# Enable CORS for all routes
-CORS(app)
+def preprocess_text(text):
+    """Preprocess text by removing unwanted characters."""
+    cleaned_text = re.sub('[^அ-ஹஂா-ு-ூெ-ைொ-்]', ' ', text)
+    return cleaned_text
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     # Get data from the request
@@ -21,21 +24,15 @@ def analyze():
         return jsonify({'error': 'No input provided'}), 400
 
     # Preprocess the input using the vectorizer
-    transformed_input = vectorizer.transform([text])
-    print(f"Transformed Input: {transformed_input}")  # Debug statement
+    preprocessed_text = preprocess_text(text)
+    transformed_input = vectorizer.transform([preprocessed_text])
 
     # Predict sentiment using the model
     prediction = model.predict(transformed_input)
-    print(f"Prediction: {prediction}")  # Debug statement
 
     # Assuming the model returns classes like 0 (negative), 1 (neutral), 2 (positive)
-    sentiment = ''
-    if prediction[0] == 0:
-        sentiment = 'negative'
-    elif prediction[0] == 1:
-        sentiment = 'neutral'
-    elif prediction[0] == 2:
-        sentiment = 'positive'
+    sentiment_mapping = {0: 'Not Favorable', 1: 'Neutral', 2: 'Favorable'}
+    sentiment = sentiment_mapping.get(prediction[0], 'Unknown')
 
     # Return prediction
     return jsonify({'sentiment': sentiment})
