@@ -11,7 +11,6 @@ app = Flask(__name__)
 
 # Enable CORS for all routes
 CORS(app)
-
 @app.route('/analyze', methods=['POST'])
 def analyze():
     # Get data from the request
@@ -23,9 +22,11 @@ def analyze():
 
     # Preprocess the input using the vectorizer
     transformed_input = vectorizer.transform([text])
+    print(f"Transformed Input: {transformed_input}")  # Debug statement
 
     # Predict sentiment using the model
     prediction = model.predict(transformed_input)
+    print(f"Prediction: {prediction}")  # Debug statement
 
     # Assuming the model returns classes like 0 (negative), 1 (neutral), 2 (positive)
     sentiment = ''
