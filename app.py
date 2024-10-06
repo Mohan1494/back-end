@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # Import CORS
 import joblib
 import os
 
@@ -7,6 +8,9 @@ vectorizer = joblib.load('vectorizer.pkl')
 model = joblib.load('model.pkl')
 
 app = Flask(__name__)
+
+# Enable CORS for all routes
+CORS(app)
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
